@@ -1,6 +1,6 @@
 # Kans Mode International Website
 
-Built Astro v6 + React 19 + Svelte 5 + Tailwind v4, deployed on Cloudflare Pages with D1 and Sanity CMS.
+Built with Astro v6 + React 19 + Svelte 5 + Tailwind v4, deployed on Cloudflare Pages with D1 and Sanity CMS.
 
 ## Stack
 
