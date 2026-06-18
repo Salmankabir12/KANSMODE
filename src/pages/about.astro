@@ -1,0 +1,181 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Container from '@/components/astro/Container.astro';
+import Section from '@/components/astro/Section.astro';
+import Header from '@/components/svelte/layout/Header.svelte';
+import Footer from '@/components/svelte/layout/Footer.svelte';
+import { sanityClient } from '@/lib/sanity';
+import { teamMembersQuery, servicesQuery } from '@/lib/queries';
+import { placeholderTeam, placeholderServices } from '@/data/placeholders';
+import FadeIn from '@/components/svelte/animations/FadeIn.svelte';
+import StaggerChildren from '@/components/svelte/animations/StaggerChildren.svelte';
+import StaggerItem from '@/components/svelte/animations/StaggerItem.svelte';
+import TextReveal from '@/components/svelte/animations/TextReveal.svelte';
+import SquaresBackground from '@/components/svelte/ui/SquaresBackground.svelte';
+import { LazyFloatingLines } from '@/components/react/shared/LazyFloatingLines';
+
+const teamRaw = await sanityClient.fetch(teamMembersQuery).catch(() => []);
+const servicesRaw = await sanityClient.fetch(servicesQuery).catch(() => []);
+const team = teamRaw.length ? teamRaw : placeholderTeam;
+const services = servicesRaw.length ? servicesRaw : placeholderServices;
+
+const pathname = Astro.url.pathname;
+---
+
+<BaseLayout title="About Us — Kans Mode International">
+  <Header pathname={pathname} client:load />
+  <main id="main-content" class="relative z-10 bg-white">
+    <!-- Hero Section -->
+    <section class="relative w-full bg-brand-navy overflow-hidden py-24 md:py-32">
+      <!-- LazyFloatingLines base layer -->
+      <div class="absolute inset-0 opacity-60 mix-blend-screen pointer-events-auto z-0">
+        <LazyFloatingLines
+          enabledWaves={['top', 'middle', 'bottom']}
+          lineCount={[8, 12, 16]}
+          lineDistance={[6, 4, 3]}
+          linesGradient={['#1a2744', '#e94560', '#2563eb', '#ffffff']}
+          interactive={true}
+          parallax={true}
+          mixBlendMode="screen"
+          client:load
+        />
+      </div>
+
+      <!-- SquaresBackground overlay -->
+      <div class="absolute inset-0 opacity-40 mix-blend-screen pointer-events-auto z-[1]">
+        <SquaresBackground
+          client:load
+          direction="diagonal"
+          speed={0.5}
+          squareSize={40}
+          borderColor="rgba(255,255,255,0.12)"
+          hoverFillColor="rgba(233,69,96,0.12)"
+        />
+      </div>
+
+      <!-- Brand overlays -->
+      <div class="absolute inset-0 bg-brand-navy/60 z-[2] pointer-events-none"></div>
+      <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(26,39,68,0.8)_80%,rgba(26,39,68,1)_100%)] z-[2] mix-blend-multiply pointer-events-none"></div>
+      <div class="absolute inset-0 bg-gradient-to-b from-brand-navy/40 via-transparent to-brand-navy z-[2] pointer-events-none"></div>
+
+      <Container>
+        <div class="relative z-10 max-w-3xl">
+          <FadeIn client:visible>
+            <span class="inline-block px-4 py-1.5 rounded-full bg-brand-red/10 text-brand-red text-sm font-medium mb-6">
+              Who We Are
+            </span>
+          </FadeIn>
+          <TextReveal
+            text="About Kans Mode International"
+            as="h1"
+            class="text-4xl md:text-5xl lg:text-6xl font-bold font-display text-white"
+            client:visible
+          />
+          <FadeIn delay={0.3} client:visible>
+            <p class="mt-6 text-lg text-white/70 leading-relaxed max-w-2xl">
+              Kans Mode International is a Bangladesh-based garments buying house built on a foundation
+              of trust, efficiency, and long-term partnerships.
+            </p>
+          </FadeIn>
+        </div>
+      </Container>
+    </section>
+
+    <!-- Company Intro -->
+    <Section padding="lg">
+      <Container>
+        <div class="grid items-center gap-12 lg:grid-cols-2">
+          <FadeIn direction="left" client:visible>
+            <div>
+              <span class="text-sm font-semibold uppercase tracking-wider text-brand-red/70">Our Story</span>
+              <TextReveal text="Built on Trust, Driven by Precision" as="h2" class="mt-2 text-3xl font-bold text-text-heading md:text-4xl" client:visible />
+              <p class="mt-6 text-text-muted leading-relaxed">
+                With deep industry experience, we connect global buyers with reliable manufacturers, ensuring every product meets strict quality, compliance, and delivery standards.
+              </p>
+            </div>
+          </FadeIn>
+          <FadeIn direction="right" client:visible>
+            <div class="rounded-2xl bg-slate-100 p-8 transition-all duration-300 hover:shadow-lg">
+              <h3 class="mb-4 text-xl font-bold text-text-heading">Communication</h3>
+              <p class="text-text-muted">Clear, timely, and transparent communication with buyers at every stage of the order lifecycle.</p>
+            </div>
+          </FadeIn>
+        </div>
+      </Container>
+    </Section>
+
+    <!-- Mission & Vision -->
+    <Section variant="secondary" padding="lg">
+      <Container>
+        <FadeIn client:visible>
+          <div class="mb-12 text-center">
+            <span class="text-sm font-semibold uppercase tracking-wider text-brand-red/70">Our Foundation</span>
+            <TextReveal text="Reliable Sourcing. Consistent Delivery." as="h2" class="mt-2 text-3xl font-bold text-text-heading md:text-4xl" client:visible />
+          </div>
+        </FadeIn>
+        <StaggerChildren staggerDelay={0.1} client:visible>
+          <div class="grid gap-8 md:grid-cols-2">
+            <StaggerItem index={0}>
+              <div class="rounded-2xl border border-slate-200 bg-white p-8 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-brand-red/20">
+                <h3 class="mb-4 text-xl font-bold text-text-heading">Our Mission</h3>
+                <p class="text-text-muted">To deliver consistent quality and dependable sourcing solutions that help our partners grow with confidence.</p>
+                <ul class="mt-4 space-y-2 text-sm text-text-muted">
+                  <li class="flex items-start gap-2"><span class="text-brand-red">•</span> Strong supplier network</li>
+                  <li class="flex items-start gap-2"><span class="text-brand-red">•</span> Strict quality control</li>
+                  <li class="flex items-start gap-2"><span class="text-brand-red">•</span> Competitive pricing & efficiency</li>
+                </ul>
+              </div>
+            </StaggerItem>
+            <StaggerItem index={1}>
+              <div class="rounded-2xl border border-slate-200 bg-white p-8 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-brand-red/20">
+                <h3 class="mb-4 text-xl font-bold text-text-heading">Our Vision</h3>
+                <p class="text-text-muted">To be a globally trusted apparel sourcing partner known for reliability, transparency, and excellence.</p>
+                <ul class="mt-4 space-y-2 text-sm text-text-muted">
+                  <li class="flex items-start gap-2"><span class="text-brand-red">•</span> Long-term global partnerships</li>
+                  <li class="flex items-start gap-2"><span class="text-brand-red">•</span> Continuous improvement in sourcing</li>
+                  <li class="flex items-start gap-2"><span class="text-brand-red">•</span> Consistent, on-time delivery</li>
+                </ul>
+              </div>
+            </StaggerItem>
+          </div>
+        </StaggerChildren>
+      </Container>
+    </Section>
+
+    <!-- Team -->
+    <Section padding="lg">
+      <Container>
+        <FadeIn client:visible>
+          <div class="mb-12 text-center">
+            <span class="text-sm font-semibold uppercase tracking-wider text-brand-red/70">Our People</span>
+            <TextReveal text="Meet the Team" as="h2" class="mt-2 text-3xl font-bold text-text-heading md:text-4xl" client:visible />
+          </div>
+        </FadeIn>
+        <StaggerChildren staggerDelay={0.08} client:visible>
+          <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {team.map((member, i) => (
+              <StaggerItem index={i}>
+                <div class="group rounded-2xl border border-slate-200 bg-white p-6 text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
+                  onmousemove={(e) => {
+                    const r = e.currentTarget.getBoundingClientRect();
+                    const x = e.clientX - r.left, y = e.clientY - r.top;
+                    const cx = r.width / 2, cy = r.height / 2;
+                    e.currentTarget.style.transform = `perspective(1000px) rotateX(${((y - cy) / cy) * -4}deg) rotateY(${((x - cx) / cx) * 4}deg) scale3d(1.02, 1.02, 1.02)`;
+                  }}
+                  onmouseleave={(e) => {
+                    e.currentTarget.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+                  }}
+                  style="transform-style: preserve-3d;">
+                  <div class="mx-auto mb-4 h-24 w-24 rounded-full bg-gradient-to-br from-slate-200 to-slate-300 transition-all duration-300 group-hover:shadow-lg group-hover:shadow-brand-red/20"></div>
+                  <h3 class="text-lg font-bold text-text-heading">{member.name}</h3>
+                  <p class="text-sm text-brand-red">{member.role}</p>
+                </div>
+              </StaggerItem>
+            ))}
+          </div>
+        </StaggerChildren>
+      </Container>
+    </Section>
+  </main>
+  <Footer client:load />
+</BaseLayout>

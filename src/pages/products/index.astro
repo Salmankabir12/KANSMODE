@@ -1,0 +1,72 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Container from '@/components/astro/Container.astro';
+import Section from '@/components/astro/Section.astro';
+import Header from '@/components/svelte/layout/Header.svelte';
+import Footer from '@/components/svelte/layout/Footer.svelte';
+import { sanityClient } from '@/lib/sanity';
+import { productCategoriesQuery } from '@/lib/queries';
+import { placeholderCategories } from '@/data/placeholders';
+import FadeIn from '@/components/svelte/animations/FadeIn.svelte';
+import StaggerChildren from '@/components/svelte/animations/StaggerChildren.svelte';
+import StaggerItem from '@/components/svelte/animations/StaggerItem.svelte';
+import TextReveal from '@/components/svelte/animations/TextReveal.svelte';
+import SquaresBackground from '@/components/svelte/ui/SquaresBackground.svelte';
+
+const categories = await sanityClient.fetch(productCategoriesQuery).catch(() => []) || placeholderCategories;
+
+const pathname = Astro.url.pathname;
+---
+
+<BaseLayout title="Products — Kans Mode International">
+  <Header pathname={pathname} client:load />
+  <main id="main-content" class="relative z-10 bg-white">
+  <section class="relative bg-brand-navy py-20 text-white overflow-hidden">
+    <div class="absolute inset-0 opacity-10">
+      <SquaresBackground direction="diagonal" speed={0.5} borderColor="rgba(255,255,255,0.08)" squareSize={50} client:load />
+    </div>
+    <Container>
+      <div class="relative z-10 max-w-2xl">
+        <h1 class="hero-animate hero-delay-1 text-4xl font-bold md:text-5xl">Products Information</h1>
+        <nav class="hero-animate hero-delay-2 mt-4 text-sm text-slate-300" aria-label="Breadcrumb">
+          <a href="/" class="hover:text-white transition-colors">Home</a>
+          <span class="mx-2">/</span>
+          <span>Products Category</span>
+        </nav>
+      </div>
+    </Container>
+  </section>
+
+  <Section>
+    <Container>
+      <FadeIn direction="up">
+        <div class="mb-12 text-center">
+          <span class="text-sm font-semibold uppercase tracking-wider text-brand-blue">Our Products</span>
+          <TextReveal text="Top Class Category of Our Products" as="h2" class="mt-2 text-3xl font-bold text-brand-navy md:text-4xl" />
+        </div>
+      </FadeIn>
+      <StaggerChildren staggerDelay={0.1}>
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {categories.map((category, i) => (
+            <StaggerItem index={i}>
+              <a href={`/product/${category.slug.current}`}
+                class="group block overflow-hidden rounded-2xl border border-slate-200 bg-white transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-brand-accent/30">
+                <div class="aspect-[4/3] bg-gradient-to-br from-slate-100 to-slate-200 relative overflow-hidden">
+                  <div class="absolute inset-0 bg-gradient-to-tr from-brand-accent/0 to-brand-accent/0 group-hover:from-brand-accent/10 group-hover:to-brand-accent/5 transition-all duration-500"></div>
+                </div>
+                <div class="p-6">
+                  <h3 class="text-xl font-bold text-brand-navy group-hover:text-brand-blue transition-colors">
+                    {category.name}
+                  </h3>
+                  {category.description && <p class="mt-2 text-sm text-slate-600">{category.description}</p>}
+                </div>
+              </a>
+            </StaggerItem>
+          ))}
+        </div>
+      </StaggerChildren>
+    </Container>
+  </Section>
+  </main>
+  <Footer client:load />
+</BaseLayout>

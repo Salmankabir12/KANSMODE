@@ -1,0 +1,248 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Container from '@/components/astro/Container.astro';
+import Section from '@/components/astro/Section.astro';
+import Header from '@/components/svelte/layout/Header.svelte';
+import Footer from '@/components/svelte/layout/Footer.svelte';
+import FadeIn from '@/components/svelte/animations/FadeIn.svelte';
+import TextReveal from '@/components/svelte/animations/TextReveal.svelte';
+import LightBeamButton from '@/components/svelte/shared/LightBeamButton.svelte';
+import SquaresBackground from '@/components/svelte/ui/SquaresBackground.svelte';
+import { LazyFloatingLines } from '@/components/react/shared/LazyFloatingLines';
+import { LazyGlobeViz } from '@/components/react/globe/LazyGlobeViz';
+
+const pathname = Astro.url.pathname;
+
+const officeLocations = [
+  {
+    city: 'Dhaka — Head Office',
+    label: 'Global HQ',
+    address: 'House# 06 Road# 19 Sector# 12 Uttara Dhaka-1230, Bangladesh',
+    phone: '+880 1716 972 940',
+    email: 'info@kansmode.com',
+  },
+];
+
+const contactDetails = [
+  { label: 'Phone', value: '+880 1716 972 940', href: 'tel:+8801716972940' },
+  { label: 'Phone', value: '+880 1913 936 936', href: 'tel:+8801913936936' },
+  { label: 'Email', value: 'info@kansmode.com', href: 'mailto:info@kansmode.com' },
+  { label: 'Business Hours', value: 'Mon - Thu: 9:00 AM - 5:00 PM (BST)', href: null },
+];
+
+const dhakaPins = [{ coords: [90.4, 23.8] as [number, number] }];
+---
+
+<BaseLayout title="Contact Us — Kans Mode International">
+  <Header pathname={pathname} client:load />
+  <main id="main-content" class="relative z-10 bg-white">
+    <!-- Hero Section -->
+    <section class="relative w-full bg-brand-navy overflow-hidden py-24 md:py-32">
+      <!-- LazyFloatingLines base layer -->
+      <div class="absolute inset-0 opacity-60 mix-blend-screen pointer-events-auto z-0">
+        <LazyFloatingLines
+          enabledWaves={['top', 'middle', 'bottom']}
+          lineCount={[8, 12, 16]}
+          lineDistance={[6, 4, 3]}
+          linesGradient={['#1a2744', '#e94560', '#2563eb', '#ffffff']}
+          interactive={true}
+          parallax={true}
+          mixBlendMode="screen"
+          client:load
+        />
+      </div>
+
+      <!-- SquaresBackground overlay -->
+      <div class="absolute inset-0 opacity-40 mix-blend-screen pointer-events-auto z-[1]">
+        <SquaresBackground
+          client:load
+          direction="diagonal"
+          speed={0.5}
+          squareSize={40}
+          borderColor="rgba(255,255,255,0.12)"
+          hoverFillColor="rgba(233,69,96,0.12)"
+        />
+      </div>
+
+      <!-- Brand overlays -->
+      <div class="absolute inset-0 bg-brand-navy/60 z-[2] pointer-events-none"></div>
+      <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(26,39,68,0.8)_80%,rgba(26,39,68,1)_100%)] z-[2] mix-blend-multiply pointer-events-none"></div>
+      <div class="absolute inset-0 bg-gradient-to-b from-brand-navy/40 via-transparent to-brand-navy z-[2] pointer-events-none"></div>
+
+      <Container>
+        <div class="max-w-3xl">
+          <FadeIn client:visible>
+            <span class="inline-block px-4 py-1.5 rounded-full bg-brand-red/10 text-brand-red text-sm font-medium mb-6">
+              Get in Touch
+            </span>
+          </FadeIn>
+          <TextReveal
+            text="Contact Us"
+            as="h1"
+            class="text-4xl md:text-5xl lg:text-6xl font-bold font-display text-white"
+            client:visible
+          />
+          <FadeIn delay={0.3} client:visible>
+            <p class="mt-6 text-lg text-white/70 leading-relaxed max-w-2xl">
+              Have a question about sourcing, partnerships, or anything else? We'd love to hear from you.
+            </p>
+          </FadeIn>
+        </div>
+      </Container>
+    </section>
+
+    <!-- Contact Form + Info -->
+    <Section padding="lg">
+      <Container>
+        <div class="grid lg:grid-cols-[1fr_380px] gap-12 lg:gap-16">
+          <!-- Form -->
+          <div>
+            <FadeIn direction="left" client:visible>
+              <div>
+                <h2 class="text-2xl md:text-3xl font-bold text-text-heading font-display mb-2">
+                  Send Us a Message
+                </h2>
+                <p class="text-text-muted mb-8">
+                  Fill out the form below and our team will respond within 24 business hours.
+                </p>
+              </div>
+            </FadeIn>
+            <form id="contact-form" class="space-y-4">
+              {['name', 'email', 'phone', 'subject'].map((field) => (
+                <input
+                  type={field === 'email' ? 'email' : 'text'}
+                  name={field}
+                  placeholder={field.charAt(0).toUpperCase() + field.slice(1) + (field === 'name' || field === 'email' ? '*' : '')}
+                  required={field === 'name' || field === 'email'}
+                  class="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition-all duration-200 focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20 hover:border-slate-300"
+                />
+              ))}
+              <textarea name="message" placeholder="Your Message*" rows="5" required
+                class="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition-all duration-200 focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20 hover:border-slate-300"></textarea>
+              <LightBeamButton type="submit" variant="primary" size="lg" class="w-full">
+                Send Message
+              </LightBeamButton>
+              <p id="form-status" class="text-center text-sm"></p>
+            </form>
+          </div>
+
+          <!-- Contact Info -->
+          <FadeIn direction="right" delay={0.2} client:visible>
+            <div class="space-y-8">
+              <!-- Quick Contact -->
+              <div class="bg-brand-navy rounded-2xl p-6 text-white">
+                <h3 class="text-lg font-semibold font-display mb-6">Quick Contact</h3>
+                <div class="space-y-4">
+                  {contactDetails.map((item) => (
+                    <div>
+                      {item.href ? (
+                        <a href={item.href} class="flex items-start gap-3 hover:opacity-80 transition-opacity">
+                          <div class="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
+                            <span class="text-brand-red text-sm font-bold">{item.label.charAt(0)}</span>
+                          </div>
+                          <div>
+                            <p class="text-xs text-white/40 uppercase tracking-wider mb-0.5">{item.label}</p>
+                            <p class="text-sm text-white/80">{item.value}</p>
+                          </div>
+                        </a>
+                      ) : (
+                        <div class="flex items-start gap-3">
+                          <div class="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
+                            <span class="text-brand-red text-sm font-bold">{item.label.charAt(0)}</span>
+                          </div>
+                          <div>
+                            <p class="text-xs text-white/40 uppercase tracking-wider mb-0.5">{item.label}</p>
+                            <p class="text-sm text-white/80">{item.value}</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <!-- Office Locations -->
+              <div>
+                <h3 class="text-lg font-semibold text-text-heading font-display mb-4">Our Offices</h3>
+                <div class="space-y-4">
+                  {officeLocations.map((office) => (
+                    <div class="bg-white rounded-xl border border-gray-100 p-5 hover:shadow-md transition-shadow">
+                      <div class="flex items-center gap-2 mb-2">
+                        <svg class="h-4 w-4 text-brand-red" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                        </svg>
+                        <h4 class="font-semibold text-text-heading text-sm">{office.city}</h4>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-brand-navy/5 text-brand-navy">
+                          {office.label}
+                        </span>
+                      </div>
+                      <p class="text-sm text-text-muted leading-relaxed">{office.address}</p>
+                      <div class="mt-2 flex flex-col gap-1 text-xs text-text-muted">
+                        <a href={`tel:${office.phone.replace(/\s/g, '')}`} class="hover:text-brand-red transition-colors">
+                          {office.phone}
+                        </a>
+                        <a href={`mailto:${office.email}`} class="hover:text-brand-red transition-colors">
+                          {office.email}
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </FadeIn>
+        </div>
+      </Container>
+    </Section>
+
+    <!-- Globe -->
+    <section class="relative bg-brand-navy overflow-hidden">
+      <div class="h-[220px] md:h-[300px]">
+        <LazyGlobeViz
+          pins={dhakaPins}
+          showScene={true}
+          enableScrollRotation={true}
+          className="w-full h-full"
+          client:only="react"
+        />
+      </div>
+    </section>
+  </main>
+  <Footer client:load />
+</BaseLayout>
+
+<script>
+  const form = document.getElementById('contact-form') as HTMLFormElement;
+  const status = document.getElementById('form-status') as HTMLParagraphElement;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    status.textContent = 'Sending...';
+
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      const result = await res.json();
+
+      if (res.ok) {
+        status.textContent = 'Message sent successfully!';
+        status.className = 'text-center text-sm text-green-600';
+        form.reset();
+      } else {
+        status.textContent = result.error || 'Something went wrong';
+        status.className = 'text-center text-sm text-red-600';
+      }
+    } catch {
+      status.textContent = 'Network error. Try again.';
+      status.className = 'text-center text-sm text-red-600';
+    }
+  });
+</script>

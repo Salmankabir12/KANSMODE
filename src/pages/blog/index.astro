@@ -1,0 +1,43 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Container from '@/components/astro/Container.astro';
+import Section from '@/components/astro/Section.astro';
+import { sanityClient } from '@/lib/sanity';
+import { postsQuery } from '@/lib/queries';
+import { placeholderPosts } from '@/data/placeholders';
+
+const postsRaw = await sanityClient.fetch(postsQuery).catch(() => []);
+const posts = postsRaw.length ? postsRaw : placeholderPosts;
+---
+
+<BaseLayout title="Blog — Kans Mode International">
+  <section class="bg-brand-navy py-20 text-white">
+    <Container>
+      <div class="max-w-2xl">
+        <h1 class="text-4xl font-bold md:text-5xl">Latest News & Articles</h1>
+        <nav class="mt-4 text-sm text-slate-300" aria-label="Breadcrumb">
+          <a href="/" class="hover:text-white">Home</a>
+          <span class="mx-2">/</span>
+          <span>Blog</span>
+        </nav>
+      </div>
+    </Container>
+  </section>
+
+  <Section>
+    <Container>
+      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {posts.map((post: any) => (
+          <a href={`/blog/${post.slug.current}`} class="group overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:shadow-lg">
+            <div class="aspect-video bg-slate-100"></div>
+            <div class="p-5">
+              <p class="mb-2 text-xs text-slate-500">{new Date(post.publishedAt).toLocaleDateString()}</p>
+              <h2 class="mb-2 text-lg font-bold text-brand-navy group-hover:text-brand-blue">{post.title}</h2>
+              {post.excerpt && <p class="text-sm text-slate-600 line-clamp-2">{post.excerpt}</p>}
+            </div>
+          </a>
+        ))}
+      </div>
+    </Container>
+  </Section>
+</BaseLayout>

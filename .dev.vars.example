@@ -1,0 +1,5 @@
+# Cloudflare Worker secrets for LOCAL DEV via `wrangler dev`
+# Copy this file to .dev.vars (gitignored) and fill in real values.
+# In PRODUCTION these are set via: wrangler secret put <KEY>
+
+RESEND_API_KEY=re_...

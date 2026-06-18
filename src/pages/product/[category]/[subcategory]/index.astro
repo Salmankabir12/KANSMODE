@@ -1,0 +1,61 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Container from '@/components/astro/Container.astro';
+import Section from '@/components/astro/Section.astro';
+import { sanityClient } from '@/lib/sanity';
+import { productCategoriesQuery, productSubcategoriesQuery, productsQuery } from '@/lib/queries';
+import { placeholderCategories, placeholderProducts } from '@/data/placeholders';
+
+const { category, subcategory } = Astro.params;
+const allCategoriesRaw = await sanityClient.fetch(productCategoriesQuery).catch(() => []);
+const allCategories = allCategoriesRaw.length ? allCategoriesRaw : placeholderCategories;
+const currentCategory = allCategories.find((c: any) => c.slug.current === category);
+const allSubcategories = await sanityClient.fetch(productSubcategoriesQuery).catch(() => []);
+const currentSubcategory = allSubcategories.find((s: any) => s.slug.current === subcategory);
+
+const allProductsRaw = await sanityClient.fetch(productsQuery).catch(() => []);
+const allProducts = allProductsRaw.length ? allProductsRaw : placeholderProducts;
+const products = allProducts.filter(
+  (p: any) => p.subcategory?._id === currentSubcategory?._id || p.category._id === currentCategory?._id
+);
+---
+
+<BaseLayout title={`${currentSubcategory?.name || 'Products'} — Kans Mode International`}>
+  <section class="bg-brand-navy py-20 text-white">
+    <Container>
+      <div class="max-w-2xl">
+        <h1 class="text-4xl font-bold md:text-5xl">Products Information</h1>
+        <nav class="mt-4 text-sm text-slate-300" aria-label="Breadcrumb">
+          <a href="/" class="hover:text-white">Home</a>
+          <span class="mx-2">/</span>
+          <a href="/products" class="hover:text-white">Products</a>
+          <span class="mx-2">/</span>
+          <a href={`/product/${currentCategory?.slug.current}`} class="hover:text-white">{currentCategory?.name}</a>
+          <span class="mx-2">/</span>
+          <span>{currentSubcategory?.name}</span>
+        </nav>
+      </div>
+    </Container>
+  </section>
+
+  <Section>
+    <Container>
+      <div class="mb-12 text-center">
+        <span class="text-sm font-semibold uppercase tracking-wider text-brand-blue">Our Products</span>
+        <h2 class="mt-2 text-3xl font-bold text-brand-navy md:text-4xl">Top Class Products Of Us</h2>
+      </div>
+      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {products.map((product: any) => (
+          <a href={`/productDetails/${product.slug.current}`} class="group overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:shadow-lg">
+            <div class="aspect-[4/3] bg-slate-100"></div>
+            <div class="p-5">
+              <h3 class="text-lg font-bold text-brand-navy group-hover:text-brand-blue">{product.name}</h3>
+              <p class="mt-1 text-sm text-slate-500">Size: {product.size}</p>
+              <p class="mt-2 font-semibold text-brand-accent">{product.price}</p>
+            </div>
+          </a>
+        ))}
+      </div>
+    </Container>
+  </Section>
+</BaseLayout>

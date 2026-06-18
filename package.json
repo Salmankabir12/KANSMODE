@@ -1,0 +1,57 @@
+{
+  "name": "kansmode-website",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build && node -e \"const fs=require('fs'),p=require('path');function cp(a,b){fs.mkdirSync(p.dirname(b),{recursive:true});fs.cpSync(a,b,{recursive:true})} fs.writeFileSync('dist/_worker.js','import handler from \\\"./server/entry.mjs\\\"\\nexport default handler\\n');cp('dist/client/_astro','dist/_astro');if(fs.existsSync('dist/client/assets'))cp('dist/client/assets','dist/assets');\" && rm -f dist/server/wrangler.json dist/server/.prerender/wrangler.json && rm -rf dist/client .wrangler && echo '_worker.js' > dist/.assetsignore",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/check": "^0.9.9",
+    "@astrojs/cloudflare": "^13.3.0",
+    "@astrojs/react": "^5.0.4",
+    "@astrojs/sitemap": "^3.7.2",
+    "@astrojs/svelte": "^8.1.0",
+    "@portabletext/react": "^6.2.0",
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.6.1",
+    "@sanity/client": "^7.22.1",
+    "@tailwindcss/vite": "^4.1.0",
+    "@types/d3-geo": "^3.1.0",
+    "@types/three": "^0.184.1",
+    "@types/topojson-client": "^3.1.5",
+    "astro": "^6.2.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "d3-geo": "^3.1.1",
+    "detect-gpu": "^5.0.70",
+    "framer-motion": "^12.40.0",
+    "lenis": "^1.3.23",
+    "lucide-react": "^0.475.0",
+    "lucide-svelte": "^0.475.0",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "react-intersection-observer": "^10.0.3",
+    "resend": "^6.9.1",
+    "svelte": "^5.28.0",
+    "tailwind-merge": "^3.4.0",
+    "tailwindcss": "^4.1.0",
+    "three": "^0.184.0",
+    "topojson-client": "^3.1.0",
+    "zod": "^4.3.6",
+    "zustand": "^5.0.14"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260313.1",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "^5.9.3",
+    "wrangler": "^4.72.0"
+  },
+  "overrides": {
+    "uuid": "^14.0.0"
+  }
+}

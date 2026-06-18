@@ -1,0 +1,335 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Section from '@/components/astro/Section.astro';
+import Container from '@/components/astro/Container.astro';
+import Header from '@/components/svelte/layout/Header.svelte';
+import Footer from '@/components/svelte/layout/Footer.svelte';
+import { sanityClient } from '@/lib/sanity';
+import { heroBannersQuery, servicesQuery, productsQuery, testimonialsQuery, postsQuery } from '@/lib/queries';
+import {
+  placeholderHeroBanners,
+  placeholderServices,
+  placeholderProducts,
+  placeholderTestimonials,
+  placeholderPosts,
+} from '@/data/placeholders';
+import FadeIn from '@/components/svelte/animations/FadeIn.svelte';
+import StaggerChildren from '@/components/svelte/animations/StaggerChildren.svelte';
+import StaggerItem from '@/components/svelte/animations/StaggerItem.svelte';
+import CounterAnimation from '@/components/svelte/animations/CounterAnimation.svelte';
+import TextReveal from '@/components/svelte/animations/TextReveal.svelte';
+import SquaresBackground from '@/components/svelte/ui/SquaresBackground.svelte';
+import LightBeamButton from '@/components/svelte/shared/LightBeamButton.svelte';
+import { ParticleScene } from '@/components/react/three/ParticleScene';
+import { LazyLiquidEther } from '@/components/react/three/LazyLiquidEther';
+
+const banners = await sanityClient.fetch(heroBannersQuery).catch(() => []);
+const services = await sanityClient.fetch(servicesQuery).catch(() => []);
+const products = await sanityClient.fetch(productsQuery).catch(() => []);
+const testimonials = await sanityClient.fetch(testimonialsQuery).catch(() => []);
+const posts = await sanityClient.fetch(postsQuery).catch(() => []);
+
+const displayServices = services.length ? services : placeholderServices;
+const displayProducts = products.length ? products : placeholderProducts;
+const displayTestimonials = testimonials.length ? testimonials : placeholderTestimonials;
+const displayPosts = posts.length ? posts : placeholderPosts;
+
+const pathname = Astro.url.pathname;
+---
+
+<BaseLayout title="Kans Mode International">
+  <Header pathname={pathname} client:load />
+  <main id="main-content" class="relative bg-bg-primary overflow-x-hidden pt-0">
+    <!-- Hero -->
+    <section class="relative flex min-h-screen items-center bg-brand-navy text-white overflow-hidden">
+      <div class="absolute inset-0 opacity-30">
+        <ParticleScene count={800} client:load />
+      </div>
+      <div class="absolute inset-0 bg-black/40 z-[1]"></div>
+      <div class="absolute inset-0 opacity-[0.07] z-[1]">
+        <SquaresBackground direction="diagonal" speed={0.5} borderColor="rgba(255,255,255,0.08)" squareSize={50} client:load />
+      </div>
+      <div class="absolute inset-0 bg-gradient-to-b from-brand-navy/40 via-transparent to-brand-navy z-[2] pointer-events-none"></div>
+      <Container>
+        <div class="relative z-10 max-w-2xl py-32">
+          <span class="hero-animate hero-delay-1 mb-4 inline-block rounded-full bg-brand-red/20 px-4 py-1 text-sm font-medium text-brand-red">
+            100% Export Oriented Garments Buying House
+          </span>
+          <h1 class="hero-animate hero-delay-2 mb-6 text-4xl font-bold leading-tight md:text-6xl text-gradient-accent">
+            Global Garment Sourcing, Built on Trust & Precision
+          </h1>
+          <p class="hero-animate hero-delay-3 mb-8 text-lg text-white/70 md:text-xl">
+            Kans Mode International is a Bangladesh-based buying house delivering end-to-end apparel sourcing,
+            quality assurance, and production management for global brands.
+          </p>
+          <div class="hero-animate hero-delay-4 flex flex-wrap gap-4">
+            <LightBeamButton href="/products" variant="primary" class="font-semibold text-sm">
+              Explore Products
+            </LightBeamButton>
+            <LightBeamButton href="/contact" variant="secondary" class="font-semibold text-sm">
+              Contact Us
+            </LightBeamButton>
+          </div>
+        </div>
+      </Container>
+      <div class="scroll-bounce absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/50 z-10">
+        <span class="text-xs uppercase tracking-widest">Scroll</span>
+        <svg width="16" height="24" viewBox="0 0 16 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M8 5v10M8 15l-4-4M8 15l4-4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </section>
+
+    <!-- Stats section with LiquidEther -->
+    <section class="relative overflow-hidden bg-brand-navy py-20 md:py-28 z-10 border-t border-white/5 min-h-[400px]">
+      <div class="absolute inset-0 bg-gradient-to-br from-[#0d1117] via-brand-navy to-[#16213e]"></div>
+      <div class="absolute -top-20 -right-20 w-96 h-96 rounded-full bg-brand-red/8 blur-3xl"></div>
+      <div class="absolute -bottom-20 -left-20 w-72 h-72 rounded-full bg-brand-red/5 blur-3xl"></div>
+
+      <div class="absolute inset-0 opacity-40 mix-blend-screen z-0">
+        <LazyLiquidEther
+          client:only="react"
+          colors={["#0a0f1d", "#e94560", "#ff6b8a", "#e94560"]}
+          mouseForce={35}
+          autoDemo={true}
+          autoSpeed={1.2}
+          autoIntensity={4.0}
+          BFECC={true}
+          resolution={0.7}
+        />
+      </div>
+
+      <div class="absolute top-0 left-0 right-0 divider-glow"></div>
+
+      <Container class="relative z-10">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-white/5 border-y border-white/5 py-4 md:py-8">
+          {[
+            { value: 2007, suffix: '', label: 'Founded', sub: 'Established in Bangladesh' },
+            { value: 500, suffix: '+', label: 'Happy Clients', sub: 'Global brands and retailers' },
+            { value: 1000, suffix: '+', label: 'Products', sub: 'Across woven, knit & sweater' },
+            { value: 15, suffix: '+', label: 'Export Countries', sub: 'Europe, Americas, Asia & more' },
+          ].map((stat) => (
+            <div class="relative z-10 text-center px-4 py-8 group transition-transform duration-500 hover:scale-105">
+              <div class="text-5xl md:text-6xl lg:text-7xl font-bold font-display text-white tabular-nums leading-none mb-4">
+                <CounterAnimation client:visible end={stat.value} suffix={stat.suffix} duration={2.2} />
+              </div>
+              <p class="text-sm font-semibold text-white/70 uppercase tracking-wider mb-2">{stat.label}</p>
+              <p class="text-[10px] md:text-xs text-white/30 max-w-[180px] mx-auto leading-relaxed">{stat.sub}</p>
+            </div>
+          ))}
+        </div>
+      </Container>
+    </section>
+
+    <!-- Services -->
+    <Section padding="lg">
+      <Container>
+        <FadeIn client:visible>
+          <div class="mb-12 text-center">
+            <span class="text-sm font-semibold uppercase tracking-wider text-brand-red/70">What We Do</span>
+            <TextReveal text="End-to-End Sourcing & Production" as="h2" class="text-3xl font-bold text-text-heading md:text-4xl" client:visible />
+          </div>
+        </FadeIn>
+        <StaggerChildren staggerDelay={0.08} client:visible>
+          <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {displayServices.map((service, i) => (
+              <StaggerItem index={i}>
+                <div class="group rounded-2xl border border-slate-200 bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-brand-red/30"
+                  style="transform-style: preserve-3d"
+                  onmousemove={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const x = e.clientX - rect.left, y = e.clientY - rect.top;
+                    const cx = rect.width / 2, cy = rect.height / 2;
+                    e.currentTarget.style.transform = `perspective(1000px) rotateX(${((y - cy) / cy) * -5}deg) rotateY(${((x - cx) / cx) * 5}deg) scale3d(1.02, 1.02, 1.02)`;
+                  }}
+                  onmouseleave={(e) => {
+                    e.currentTarget.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+                  }}>
+                  <h3 class="mb-3 text-xl font-bold text-text-heading">{service.title}</h3>
+                  <p class="text-text-muted">{service.description}</p>
+                </div>
+              </StaggerItem>
+            ))}
+          </div>
+        </StaggerChildren>
+      </Container>
+    </Section>
+
+    <!-- Products preview -->
+    <Section variant="secondary" padding="lg">
+      <Container>
+        <FadeIn client:visible>
+          <div class="mb-12 flex items-end justify-between">
+            <div>
+              <span class="text-sm font-semibold uppercase tracking-wider text-brand-red/70">Product Categories</span>
+              <TextReveal text="Explore Our Product Range" as="h2" class="text-3xl font-bold text-text-heading md:text-4xl" client:visible />
+            </div>
+            <a href="/products" class="hidden text-sm font-semibold text-brand-blue hover:underline sm:inline">
+              View All Products →
+            </a>
+          </div>
+        </FadeIn>
+        <StaggerChildren staggerDelay={0.1} client:visible>
+          <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {displayProducts.slice(0, 3).map((product, i) => (
+              <StaggerItem index={i}>
+                <a href={`/productDetails/${product.slug.current}`} class="group block overflow-hidden rounded-2xl border border-slate-200 bg-white transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                  <div class="aspect-[4/3] bg-gradient-to-br from-slate-100 to-slate-200 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-tr from-brand-red/0 to-brand-red/0 group-hover:from-brand-red/10 group-hover:to-brand-red/5 transition-all duration-500"></div>
+                  </div>
+                  <div class="p-5">
+                    <p class="text-xs font-semibold uppercase tracking-wider text-brand-blue">{product.category?.name || 'General'}</p>
+                    <h3 class="mb-2 text-lg font-bold text-text-heading group-hover:text-brand-blue transition-colors">{product.name}</h3>
+                    <p class="text-sm text-text-muted">{product.size}</p>
+                  </div>
+                </a>
+              </StaggerItem>
+            ))}
+          </div>
+        </StaggerChildren>
+        <div class="mt-8 text-center sm:hidden">
+          <a href="/products" class="text-sm font-semibold text-brand-blue hover:underline">View All Products →</a>
+        </div>
+      </Container>
+    </Section>
+
+    <!-- How We Work -->
+    <Section padding="lg">
+      <Container>
+        <div class="grid items-center gap-12 lg:grid-cols-2">
+          <FadeIn direction="left" client:visible>
+            <div>
+              <span class="text-sm font-semibold uppercase tracking-wider text-brand-red/70">How We Work</span>
+              <TextReveal text="A Transparent, Reliable Process" as="h2" class="text-3xl font-bold text-text-heading md:text-4xl" client:visible />
+              <p class="mt-4 text-text-muted">
+                From sourcing to shipment, we manage every stage with precision. Our experienced team ensures quality,
+                consistency, and timely delivery for every order.
+              </p>
+              <StaggerChildren staggerDelay={0.1} client:visible>
+                <div class="mt-8 grid gap-4 sm:grid-cols-2">
+                  {['Sourcing', 'Sampling', 'Production', 'Shipment'].map((step, i) => (
+                    <StaggerItem index={i}>
+                      <div class="flex items-center gap-3 rounded-xl border border-slate-200 p-4 transition-all duration-300 hover:border-brand-red/30 hover:shadow-md hover:-translate-y-0.5"
+                        onmousemove={(e) => { const r = e.currentTarget.getBoundingClientRect(); const x = e.clientX - r.left, y = e.clientY - r.top; e.currentTarget.style.setProperty('--mx', x + 'px'); e.currentTarget.style.setProperty('--my', y + 'px'); }}
+                        style="background: radial-gradient(200px circle at var(--mx, 50%) var(--my, 50%), rgba(233,69,96,0.06) 0%, transparent 70%);">
+                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-navy font-bold text-white">{i + 1}</span>
+                        <span class="font-semibold text-text-heading">{step}</span>
+                      </div>
+                    </StaggerItem>
+                  ))}
+                </div>
+              </StaggerChildren>
+            </div>
+          </FadeIn>
+          <FadeIn direction="right" client:visible>
+            <div class="rounded-2xl bg-slate-100 p-8 md:p-12 transition-all duration-300 hover:shadow-lg">
+              <blockquote class="text-lg italic text-text-muted">
+                "We would like to introduce ourselves as one of the reputed 100% export oriented Readymade Garments Buying House Company."
+              </blockquote>
+              <a href="/about" class="mt-6 inline-block rounded-full bg-brand-navy px-6 py-3 font-semibold text-white transition-all duration-300 hover:bg-slate-800 hover:shadow-lg hover:-translate-y-0.5">
+                About Us
+              </a>
+            </div>
+          </FadeIn>
+        </div>
+      </Container>
+    </Section>
+
+    <!-- Testimonials -->
+    <Section variant="secondary" padding="lg" class="bg-brand-navy text-white">
+      <Container>
+        <FadeIn client:visible>
+          <div class="mb-12 text-center">
+            <span class="text-sm font-semibold uppercase tracking-wider text-brand-red/70">Testimonials</span>
+            <TextReveal text="Trusted by Global Partners" as="h2" class="text-3xl font-bold md:text-4xl" client:visible />
+          </div>
+        </FadeIn>
+        <StaggerChildren staggerDelay={0.08} client:visible>
+          <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {displayTestimonials.map((t, i) => (
+              <StaggerItem index={i}>
+                <div class="rounded-2xl border border-slate-600 bg-white/5 p-6 backdrop-blur transition-all duration-300 hover:bg-white/10 hover:border-brand-red/30">
+                  <p class="mb-4 text-slate-200">"{t.quote}"</p>
+                  <div>
+                    <p class="font-bold">{t.name}</p>
+                    <p class="text-sm text-slate-400">{t.role}</p>
+                  </div>
+                </div>
+              </StaggerItem>
+            ))}
+          </div>
+        </StaggerChildren>
+      </Container>
+    </Section>
+
+    <!-- Blog preview -->
+    <Section padding="lg">
+      <Container>
+        <FadeIn client:visible>
+          <div class="mb-12 text-center">
+            <span class="text-sm font-semibold uppercase tracking-wider text-brand-red/70">Our Success Stories</span>
+            <TextReveal text="Latest News & Articles" as="h2" class="text-3xl font-bold text-text-heading md:text-4xl" client:visible />
+          </div>
+        </FadeIn>
+        <StaggerChildren staggerDelay={0.1} client:visible>
+          <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {displayPosts.slice(0, 3).map((post, i) => (
+              <StaggerItem index={i}>
+                <a href={`/blog/${post.slug.current}`} class="group block rounded-2xl border border-slate-200 bg-white transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                  <div class="aspect-video bg-gradient-to-br from-slate-100 to-slate-200"></div>
+                  <div class="p-5">
+                    <p class="mb-2 text-xs text-text-muted">{new Date(post.publishedAt).toLocaleDateString()}</p>
+                    <h3 class="mb-2 font-bold text-text-heading group-hover:text-brand-blue transition-colors">{post.title}</h3>
+                    {post.excerpt && <p class="text-sm text-text-muted line-clamp-2">{post.excerpt}</p>}
+                  </div>
+                </a>
+              </StaggerItem>
+            ))}
+          </div>
+        </StaggerChildren>
+      </Container>
+    </Section>
+
+    <!-- CTA with LazyLiquidEther -->
+    <section class="relative overflow-hidden bg-brand-navy py-20 md:py-28 min-h-[500px]">
+      <div class="absolute inset-0 bg-gradient-to-br from-[#0d1117] via-brand-navy to-[#16213e]"></div>
+      <div class="absolute -top-20 -right-20 w-96 h-96 rounded-full bg-brand-red/8 blur-3xl"></div>
+      <div class="absolute -bottom-20 -left-20 w-72 h-72 rounded-full bg-brand-red/5 blur-3xl"></div>
+      <div class="absolute inset-0 opacity-50 mix-blend-screen z-0">
+        <LazyLiquidEther
+          client:only="react"
+          colors={["#0a0f1d", "#e94560", "#ff6b8a", "#e94560"]}
+          mouseForce={35}
+          autoDemo={true}
+          autoSpeed={1.2}
+          autoIntensity={4.0}
+          BFECC={true}
+          resolution={0.7}
+        />
+      </div>
+      <div class="absolute top-0 left-0 right-0 divider-glow"></div>
+      <Container class="relative z-10 text-center">
+        <FadeIn client:visible>
+          <span class="inline-block text-[11px] font-bold uppercase tracking-[0.3em] text-brand-red/70 mb-5">
+            Let's Work Together
+          </span>
+          <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white font-display leading-tight max-w-3xl mx-auto">
+            Ready to Source with Confidence?
+          </h2>
+          <p class="mt-5 text-white/45 max-w-2xl mx-auto text-base md:text-lg leading-relaxed">
+            Partner with Kans Mode for reliable garment sourcing, quality assurance, and on-time delivery.
+          </p>
+          <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <LightBeamButton href="/contact" variant="primary" class="font-semibold text-sm">
+              Get in Touch
+            </LightBeamButton>
+            <LightBeamButton href="/products" variant="secondary" class="font-semibold text-sm">
+              View Products
+            </LightBeamButton>
+          </div>
+        </FadeIn>
+      </Container>
+    </section>
+  </main>
+  <Footer client:load />
+</BaseLayout>

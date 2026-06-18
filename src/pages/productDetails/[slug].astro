@@ -1,0 +1,66 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Container from '@/components/astro/Container.astro';
+import Section from '@/components/astro/Section.astro';
+import { sanityClient } from '@/lib/sanity';
+import { productsQuery, productBySlugQuery } from '@/lib/queries';
+import { placeholderProducts } from '@/data/placeholders';
+
+const { slug } = Astro.params;
+const product = await sanityClient.fetch(productBySlugQuery, { slug }).catch(() => null) || placeholderProducts.find((p) => p.slug.current === slug);
+
+if (!product) {
+  return Astro.redirect('/products', 404);
+}
+---
+
+<BaseLayout title={`${product.name} — Kans Mode International`}>
+  <section class="bg-brand-navy py-20 text-white">
+    <Container>
+      <div class="max-w-2xl">
+        <h1 class="text-4xl font-bold md:text-5xl">{product.name}</h1>
+        <nav class="mt-4 text-sm text-slate-300" aria-label="Breadcrumb">
+          <a href="/" class="hover:text-white">Home</a>
+          <span class="mx-2">/</span>
+          <a href="/products" class="hover:text-white">Products</a>
+          <span class="mx-2">/</span>
+          <span>{product.name}</span>
+        </nav>
+      </div>
+    </Container>
+  </section>
+
+  <Section>
+    <Container>
+      <div class="grid gap-12 lg:grid-cols-2">
+        <div class="rounded-2xl bg-slate-100 p-4">
+          <div class="aspect-square w-full rounded-xl bg-white"></div>
+        </div>
+        <div>
+          <p class="text-sm font-semibold uppercase tracking-wider text-brand-blue">{product.category?.name}</p>
+          <h2 class="mt-2 text-3xl font-bold text-brand-navy">{product.name}</h2>
+          <div class="mt-6 space-y-4">
+            {product.size && (
+              <div class="flex justify-between border-b border-slate-200 py-3">
+                <span class="text-slate-600">Size</span>
+                <span class="font-semibold text-brand-navy">{product.size}</span>
+              </div>
+            )}
+            {product.price && (
+              <div class="flex justify-between border-b border-slate-200 py-3">
+                <span class="text-slate-600">Price</span>
+                <span class="font-semibold text-brand-accent">{product.price}</span>
+              </div>
+            )}
+          </div>
+          <p class="mt-6 text-slate-600">
+            High-quality garment produced with strict quality control and timely delivery standards.
+          </p>
+          <a href="/contact" class="mt-8 inline-block rounded-full bg-brand-navy px-8 py-3 font-semibold text-white transition hover:bg-slate-800">
+            Send Inquiry
+          </a>
+        </div>
+      </div>
+    </Container>
+  </Section>
+</BaseLayout>

@@ -1,0 +1,13 @@
+{
+  "name": "kansmode-website",
+  "compatibility_date": "2025-03-15",
+  "compatibility_flags": ["nodejs_compat"],
+  "pages_build_output_dir": "./dist",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "kansmode-contacts",
+      "database_id": "bff15d6f-85dc-4031-9900-88eeb287a742"
+    }
+  ]
+}
