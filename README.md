@@ -1,6 +1,6 @@
 # Kans Mode International Website
 
-New kansmode.com website built with the same stack as Mustang Group: Astro v6 + React 19 + Svelte 5 + Tailwind v4, deployed on Cloudflare Pages with D1 and Sanity CMS.
+Built Astro v6 + React 19 + Svelte 5 + Tailwind v4, deployed on Cloudflare Pages with D1 and Sanity CMS.
 
 ## Stack
 
