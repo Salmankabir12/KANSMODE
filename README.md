@@ -44,8 +44,39 @@ npx wrangler pages deploy dist --project-name=kansmode-website --branch=main
 
 ## Sanity Studio
 
+Full CMS for editors, images, rich text, and all content types.
+
+- **Live Studio:** https://kansmode-cms.sanity.studio
+- **Local dev:**
+  ```bash
+  cd studio
+  npm install
+  npm run dev
+  ```
+
+## Admin Panel
+
+A built-in admin dashboard is available at `/admin`.
+
+Features:
+- Password-protected login
+- Content overview with document counts
+- Quick create forms for testimonials, clients, services, team members, categories, products, posts, and hero banners
+- Site settings editor for title, contact info, and social links
+- Direct links to Sanity Studio for full editing
+
+Required environment variables:
+
+```
+ADMIN_PASSWORD=change-me
+ADMIN_SESSION_SECRET=any-long-random-string
+SANITY_API_TOKEN=sk...   # token with Editor permissions
+```
+
+In production, set these via Wrangler secrets:
+
 ```bash
-cd studio
-npm install
-npm run dev
+npx wrangler secret put ADMIN_PASSWORD
+npx wrangler secret put ADMIN_SESSION_SECRET
+npx wrangler secret put SANITY_API_TOKEN
 ```

@@ -1,0 +1,123 @@
+---
+import { COOKIE_NAME, getSessionSecret, verifySession } from '@/lib/admin/auth';
+import { sanityClient } from '@/lib/sanity';
+
+const session = Astro.cookies.get(COOKIE_NAME)?.value;
+const secret = getSessionSecret();
+const isLoggedIn = secret ? await verifySession(session, secret) : false;
+
+if (!isLoggedIn) {
+  return Astro.redirect('/admin');
+}
+
+const settings = await sanityClient.fetch(`*[_type == "siteSettings"][0]`).catch(() => null);
+const error = Astro.url.searchParams.get('error');
+const success = Astro.url.searchParams.get('success');
+---
+
+<!doctype html>
+<html lang="en" class="bg-slate-950 text-white">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Site Settings — Kans Mode Admin</title>
+    <style>
+      body { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    </style>
+  </head>
+  <body class="min-h-screen">
+    <header class="border-b border-slate-800 bg-slate-900/80 px-6 py-4 backdrop-blur">
+      <div class="mx-auto flex max-w-3xl items-center justify-between">
+        <div class="flex items-center gap-4">
+          <a href="/admin/dashboard" class="text-sm text-slate-400 hover:text-white">← Dashboard</a>
+          <h1 class="text-xl font-bold">Site Settings</h1>
+        </div>
+      </div>
+    </header>
+
+    <main class="mx-auto max-w-3xl px-6 py-10">
+      {error && (
+        <div class="mb-6 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+          Failed to save settings. {error}
+        </div>
+      )}
+      {success && (
+        <div class="mb-6 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+          Settings saved successfully.
+        </div>
+      )}
+
+      {settings?._id ? (
+        <form action="/api/admin/update" method="POST" class="space-y-5 rounded-xl border border-slate-800 bg-slate-900 p-6">
+          <input type="hidden" name="type" value="siteSettings" />
+          <input type="hidden" name="id" value={settings._id} />
+
+          <div>
+            <label class="mb-1 block text-sm font-medium text-slate-300">Site Title</label>
+            <input name="title" type="text" defaultValue={settings.title ?? ''} required class="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-indigo-500" />
+          </div>
+
+          <div>
+            <label class="mb-1 block text-sm font-medium text-slate-300">Description</label>
+            <textarea name="description" rows={3} class="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-indigo-500">{settings.description ?? ''}</textarea>
+          </div>
+
+          <div>
+            <label class="mb-1 block text-sm font-medium text-slate-300">Address</label>
+            <input name="address" type="text" defaultValue={settings.address ?? ''} class="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-indigo-500" />
+          </div>
+
+          <div>
+            <label class="mb-1 block text-sm font-medium text-slate-300">Email</label>
+            <input name="email" type="email" defaultValue={settings.email ?? ''} class="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-indigo-500" />
+          </div>
+
+          <div>
+            <label class="mb-1 block text-sm font-medium text-slate-300">Office Hours</label>
+            <input name="officeHours" type="text" defaultValue={settings.officeHours ?? ''} class="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-indigo-500" />
+          </div>
+
+          <div>
+            <label class="mb-1 block text-sm font-medium text-slate-300">Phone Numbers (comma separated)</label>
+            <input name="phones" type="text" defaultValue={Array.isArray(settings.phones) ? settings.phones.join(', ') : ''} class="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-indigo-500" />
+          </div>
+
+          <div>
+            <label class="mb-1 block text-sm font-medium text-slate-300">Facebook</label>
+            <input name="socialLinks.facebook" type="url" defaultValue={settings.socialLinks?.facebook ?? ''} class="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-indigo-500" />
+          </div>
+
+          <div>
+            <label class="mb-1 block text-sm font-medium text-slate-300">LinkedIn</label>
+            <input name="socialLinks.linkedin" type="url" defaultValue={settings.socialLinks?.linkedin ?? ''} class="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-indigo-500" />
+          </div>
+
+          <div>
+            <label class="mb-1 block text-sm font-medium text-slate-300">YouTube</label>
+            <input name="socialLinks.youtube" type="url" defaultValue={settings.socialLinks?.youtube ?? ''} class="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-indigo-500" />
+          </div>
+
+          <div>
+            <label class="mb-1 block text-sm font-medium text-slate-300">Twitter</label>
+            <input name="socialLinks.twitter" type="url" defaultValue={settings.socialLinks?.twitter ?? ''} class="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-indigo-500" />
+          </div>
+
+          <p class="text-xs text-slate-500">Logo changes can be made in Sanity Studio.</p>
+
+          <div class="flex gap-3 pt-2">
+            <button type="submit" class="rounded-lg bg-indigo-600 px-5 py-2.5 font-semibold text-white transition hover:bg-indigo-500">
+              Save Settings
+            </button>
+            <a href="/admin/dashboard" class="rounded-lg border border-slate-700 px-5 py-2.5 text-slate-300 transition hover:bg-slate-800 hover:text-white">
+              Cancel
+            </a>
+          </div>
+        </form>
+      ) : (
+        <div class="rounded-xl border border-slate-800 bg-slate-900 p-6 text-slate-400">
+          No site settings document found. Create one in <a href="https://kansmode-cms.sanity.studio/desk/siteSettings" target="_blank" class="text-indigo-400 underline">Sanity Studio</a> first.
+        </div>
+      )}
+    </main>
+  </body>
+</html>
