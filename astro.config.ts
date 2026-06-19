@@ -5,7 +5,7 @@ import sitemap from '@astrojs/sitemap';
 import cloudflare from '@astrojs/cloudflare';
 import tailwindcss from '@tailwindcss/vite';
 
-const SITE = 'https://www.kansmode.com';
+const SITE = process.env.PUBLIC_SITE_URL || 'https://kansmode-website.pages.dev';
 
 export default defineConfig({
   site: SITE,

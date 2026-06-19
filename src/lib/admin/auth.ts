@@ -51,12 +51,22 @@ export async function verifySession(value: string | undefined, secret: string): 
   }
 }
 
-export function getAdminPassword(): string | undefined {
-  return import.meta.env.ADMIN_PASSWORD;
+export function getAdminPassword(env: Record<string, any> = import.meta.env): string | undefined {
+  return env.ADMIN_PASSWORD;
 }
 
-export function getSessionSecret(): string | undefined {
-  return import.meta.env.ADMIN_SESSION_SECRET;
+export function getSessionSecret(env: Record<string, any> = import.meta.env): string | undefined {
+  return env.ADMIN_SESSION_SECRET;
+}
+
+export async function getRuntimeEnv(): Promise<Record<string, any>> {
+  try {
+    // @ts-ignore - Cloudflare Workers runtime module
+    const { env } = await import('cloudflare:workers');
+    return (env as Record<string, any>) ?? import.meta.env;
+  } catch {
+    return import.meta.env;
+  }
 }
 
 export { COOKIE_NAME };

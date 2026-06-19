@@ -1,8 +1,9 @@
 ---
-import { COOKIE_NAME, getSessionSecret, verifySession } from '@/lib/admin/auth';
+import { COOKIE_NAME, getSessionSecret, getRuntimeEnv, verifySession } from '@/lib/admin/auth';
 
+const env = await getRuntimeEnv();
 const session = Astro.cookies.get(COOKIE_NAME)?.value;
-const secret = getSessionSecret();
+const secret = getSessionSecret(env);
 const isLoggedIn = secret ? await verifySession(session, secret) : false;
 
 if (isLoggedIn) {

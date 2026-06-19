@@ -1,17 +1,18 @@
 import type { APIRoute } from 'astro';
-import { sanityAdminClient, isSanityWriteConfigured } from '@/lib/admin/sanity';
-import { COOKIE_NAME, getSessionSecret, verifySession } from '@/lib/admin/auth';
+import { getSanityAdminClient, isSanityWriteConfigured } from '@/lib/admin/sanity';
+import { COOKIE_NAME, getSessionSecret, getRuntimeEnv, verifySession } from '@/lib/admin/auth';
 
-export const POST: APIRoute = async ({ request, cookies, redirect }) => {
+export const POST: APIRoute = async ({ request, cookies, redirect, locals }) => {
+  const env = await getRuntimeEnv();
   const session = cookies.get(COOKIE_NAME)?.value;
-  const secret = getSessionSecret();
+  const secret = getSessionSecret(env);
   const isLoggedIn = secret ? await verifySession(session, secret) : false;
 
   if (!isLoggedIn) {
     return redirect('/admin');
   }
 
-  if (!isSanityWriteConfigured()) {
+  if (!isSanityWriteConfigured(env)) {
     return redirect('/admin/settings?error=Sanity+API+token+not+configured');
   }
 
@@ -65,6 +66,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   }
 
   try {
+    const sanityAdminClient = getSanityAdminClient(env);
     const doc = sanityAdminClient.patch(id);
     if (Object.keys(patch).length > 0) doc.set(patch);
     if (unset.length > 0) doc.unset(unset);
