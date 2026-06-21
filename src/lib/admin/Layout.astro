@@ -1,0 +1,118 @@
+---
+import '@/styles/global.css'
+import { contentTypes } from './fields'
+
+export interface Props {
+  title: string
+  currentSection?: string
+}
+
+const { title, currentSection } = Astro.props
+
+const sections = [
+  { id: 'dashboard', label: 'Dashboard', href: '/admin/dashboard', icon: '⊞' },
+  {
+    id: 'content',
+    label: 'Content',
+    icon: '☰',
+    children: contentTypes
+      .filter((t) => t.name !== 'siteSettings')
+      .map((t) => ({
+        id: t.name,
+        label: t.title,
+        href: `/admin/content/${t.name}`,
+      })),
+  },
+  { id: 'messages', label: 'Messages', href: '/admin/messages', icon: '✉' },
+  { id: 'settings', label: 'Settings', href: '/admin/settings', icon: '⚙' },
+]
+---
+
+<!doctype html>
+<html lang="en" class="bg-slate-950 text-white">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title} — Kans Mode Admin</title>
+    <style>
+      body { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    </style>
+  </head>
+  <body class="min-h-screen flex">
+    <aside class="w-60 shrink-0 border-r border-slate-800 bg-slate-900 flex flex-col h-screen sticky top-0">
+      <div class="px-5 py-4 border-b border-slate-800">
+        <a href="/admin/dashboard" class="text-lg font-bold text-white">Kans Mode</a>
+        <p class="text-xs text-slate-500 mt-0.5">Admin Panel</p>
+      </div>
+
+      <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+        {sections.map((section) => (
+          <div>
+            {section.href ? (
+              <a
+                href={section.href}
+                class={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition ${
+                  currentSection === section.id
+                    ? 'bg-indigo-600/20 text-indigo-300'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                }`}
+              >
+                <span class="w-5 text-center text-base">{section.icon}</span>
+                {section.label}
+              </a>
+            ) : (
+              <div class="flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-slate-500">
+                <span class="w-5 text-center text-base">{section.icon}</span>
+                {section.label}
+              </div>
+            )}
+
+            {section.children && (
+              <div class="ml-3 mt-0.5 space-y-0.5 border-l border-slate-800 pl-3">
+                {section.children.map((child) => (
+                  <a
+                    href={child.href}
+                    class={`block rounded-lg px-3 py-1.5 text-sm transition ${
+                      currentSection === child.id
+                        ? 'bg-indigo-600/20 text-indigo-300 font-medium'
+                        : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800'
+                    }`}
+                  >
+                    {child.label}
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </nav>
+
+      <div class="px-4 py-3 border-t border-slate-800">
+        <a
+          href="/"
+          class="block text-xs text-slate-600 hover:text-slate-400 mb-2"
+          target="_blank"
+        >
+          ← View Site
+        </a>
+        <form action="/api/admin/logout" method="POST">
+          <button
+            type="submit"
+            class="w-full rounded-lg border border-slate-700 px-3 py-1.5 text-xs text-slate-400 transition hover:bg-slate-800 hover:text-white"
+          >
+            Sign Out
+          </button>
+        </form>
+      </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col min-h-screen">
+      <header class="border-b border-slate-800 bg-slate-900/50 px-6 py-3">
+        <h1 class="text-lg font-bold">{title}</h1>
+      </header>
+      <div class="flex-1 px-6 py-6">
+        <slot />
+      </div>
+    </main>
+  </body>
+</html>

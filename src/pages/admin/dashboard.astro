@@ -1,31 +1,25 @@
 ---
+import Layout from '@/lib/admin/Layout.astro';
+import { requireAdmin } from '@/lib/admin/auth-check';
 import { sanityClient } from '@/lib/sanity';
-import { isSanityWriteConfigured } from '@/lib/admin/sanity';
-import { COOKIE_NAME, getSessionSecret, getRuntimeEnv, verifySession } from '@/lib/admin/auth';
 
-const env = await getRuntimeEnv();
-const session = Astro.cookies.get(COOKIE_NAME)?.value;
-const secret = getSessionSecret(env);
-const isLoggedIn = secret ? await verifySession(session, secret) : false;
-
-if (!isLoggedIn) {
-  return Astro.redirect('/admin');
-}
+await requireAdmin(Astro);
 
 const types = [
-  { name: 'siteSettings', title: 'Site Settings', singleton: true },
-  { name: 'heroBanner', title: 'Hero Banners', singleton: false },
-  { name: 'service', title: 'Services', singleton: false },
-  { name: 'productCategory', title: 'Product Categories', singleton: false },
-  { name: 'productSubcategory', title: 'Product Subcategories', singleton: false },
-  { name: 'product', title: 'Products', singleton: false },
-  { name: 'teamMember', title: 'Team Members', singleton: false },
-  { name: 'client', title: 'Clients', singleton: false },
-  { name: 'testimonial', title: 'Testimonials', singleton: false },
-  { name: 'post', title: 'Blog Posts', singleton: false },
+  { name: 'heroBanner', title: 'Hero Banners', icon: '🖼' },
+  { name: 'service', title: 'Services', icon: '⚡' },
+  { name: 'productCategory', title: 'Product Categories', icon: '📁' },
+  { name: 'productSubcategory', title: 'Product Subcategories', icon: '📂' },
+  { name: 'product', title: 'Products', icon: '👕' },
+  { name: 'teamMember', title: 'Team Members', icon: '👥' },
+  { name: 'client', title: 'Clients', icon: '🤝' },
+  { name: 'testimonial', title: 'Testimonials', icon: '⭐' },
+  { name: 'post', title: 'Blog Posts', icon: '📝' },
 ];
 
 const counts: Record<string, number> = {};
+let messageCount = 0;
+
 for (const t of types) {
   try {
     const result = await sanityClient.fetch(`count(*[_type == $type])`, { type: t.name });
@@ -35,81 +29,70 @@ for (const t of types) {
   }
 }
 
-const sanityStudioUrl = `https://kansmode-cms.sanity.studio`;
-const writeConfigured = isSanityWriteConfigured(env);
+try {
+  const runtime = (Astro.locals as any)?.runtime;
+  const db = runtime?.env?.DB;
+  if (db) {
+    const result = await db.prepare('SELECT COUNT(*) as count FROM contacts').first();
+    messageCount = result?.count ?? 0;
+  }
+} catch {}
 ---
 
-<!doctype html>
-<html lang="en" class="bg-slate-950 text-white">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin Dashboard — Kans Mode</title>
-    <style>
-      body { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-    </style>
-  </head>
-  <body class="min-h-screen">
-    <header class="border-b border-slate-800 bg-slate-900/80 px-6 py-4 backdrop-blur">
-      <div class="mx-auto flex max-w-6xl items-center justify-between">
-        <div>
-          <h1 class="text-xl font-bold">Kans Mode Admin</h1>
-          <p class="text-xs text-slate-400">Manage website content</p>
+<Layout title="Dashboard" currentSection="dashboard">
+  <div class="grid gap-4 md:grid-cols-3 lg:grid-cols-4 mb-8">
+    {types.map((t) => (
+      <a
+        href={`/admin/content/${t.name}`}
+        class="rounded-xl border border-slate-800 bg-slate-900 p-5 transition hover:border-indigo-500/50 hover:bg-slate-800"
+      >
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-lg">{t.icon}</span>
+          <span class="rounded-full bg-slate-800 px-3 py-1 text-sm font-medium text-slate-300">
+            {counts[t.name] ?? 0}
+          </span>
         </div>
-        <form action="/api/admin/logout" method="POST">
-          <button type="submit" class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 transition hover:bg-slate-800 hover:text-white">
-            Sign Out
-          </button>
-        </form>
+        <h3 class="font-semibold">{t.title}</h3>
+      </a>
+    ))}
+
+    <a
+      href="/admin/messages"
+      class="rounded-xl border border-slate-800 bg-slate-900 p-5 transition hover:border-indigo-500/50 hover:bg-slate-800"
+    >
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-lg">✉</span>
+        <span class="rounded-full bg-slate-800 px-3 py-1 text-sm font-medium text-slate-300">
+          {messageCount}
+        </span>
       </div>
-    </header>
+      <h3 class="font-semibold">Messages</h3>
+    </a>
+  </div>
 
-    <main class="mx-auto max-w-6xl px-6 py-10">
-      {!writeConfigured && (
-        <div class="mb-6 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
-          <strong>SANITY_API_TOKEN is not set.</strong> Quick create/edit forms are disabled. Set the token to enable in-browser editing, or use the Sanity Studio buttons below.
-        </div>
-      )}
-
-      <div class="mb-8 grid gap-4 md:grid-cols-3">
-        <a href={sanityStudioUrl} target="_blank" class="rounded-xl border border-slate-800 bg-slate-900 p-5 transition hover:border-indigo-500/50 hover:bg-slate-800">
-          <h2 class="font-semibold text-indigo-400">Open Sanity Studio</h2>
-          <p class="mt-1 text-sm text-slate-400">Full CMS for all content, images, and rich text.</p>
-        </a>
-
-        <a href="/admin/create" class="rounded-xl border border-slate-800 bg-slate-900 p-5 transition hover:border-emerald-500/50 hover:bg-slate-800">
-          <h2 class="font-semibold text-emerald-400">Quick Create</h2>
-          <p class="mt-1 text-sm text-slate-400">Add testimonials, clients, services, and more.</p>
-        </a>
-
-        <a href="/admin/settings" class="rounded-xl border border-slate-800 bg-slate-900 p-5 transition hover:border-amber-500/50 hover:bg-slate-800">
-          <h2 class="font-semibold text-amber-400">Site Settings</h2>
-          <p class="mt-1 text-sm text-slate-400">Edit site title, contact info, and social links.</p>
-        </a>
-      </div>
-
-      <h2 class="mb-4 text-lg font-bold">Content Overview</h2>
-      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {types.map((t) => (
-          <div class="rounded-xl border border-slate-800 bg-slate-900 p-5">
-            <div class="flex items-center justify-between">
-              <h3 class="font-semibold">{t.title}</h3>
-              <span class="rounded-full bg-slate-800 px-3 py-1 text-sm font-medium text-slate-300">
-                {counts[t.name] ?? 0}
-              </span>
-            </div>
-            <div class="mt-4 flex gap-2">
-              <a
-                href={`${sanityStudioUrl}/desk/${t.name}`}
-                target="_blank"
-                class="rounded-md bg-slate-800 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-slate-700"
-              >
-                Open in Studio
-              </a>
-            </div>
-          </div>
-        ))}
-      </div>
-    </main>
-  </body>
-</html>
+  <div class="rounded-xl border border-slate-800 bg-slate-900 p-6">
+    <h2 class="font-semibold mb-2">Quick Actions</h2>
+    <div class="flex flex-wrap gap-3 mt-3">
+      <a href="/admin/content/testimonial/new"
+        class="rounded-lg bg-indigo-600/20 px-4 py-2 text-sm text-indigo-300 hover:bg-indigo-600/30 transition"
+      >
+        + Add Testimonial
+      </a>
+      <a href="/admin/content/product/new"
+        class="rounded-lg bg-indigo-600/20 px-4 py-2 text-sm text-indigo-300 hover:bg-indigo-600/30 transition"
+      >
+        + Add Product
+      </a>
+      <a href="/admin/content/post/new"
+        class="rounded-lg bg-indigo-600/20 px-4 py-2 text-sm text-indigo-300 hover:bg-indigo-600/30 transition"
+      >
+        + Add Blog Post
+      </a>
+      <a href="https://kansmode-cms.sanity.studio" target="_blank"
+        class="rounded-lg bg-slate-800 px-4 py-2 text-sm text-slate-300 hover:bg-slate-700 transition"
+      >
+        Open Sanity Studio →
+      </a>
+    </div>
+  </div>
+</Layout>

@@ -1,0 +1,124 @@
+---
+import Layout from '@/lib/admin/Layout.astro';
+import { requireAdmin } from '@/lib/admin/auth-check';
+import { getTypeDef } from '@/lib/admin/fields';
+import { sanityClient } from '@/lib/sanity';
+
+await requireAdmin(Astro);
+
+const { type } = Astro.params;
+const typeDef = getTypeDef(type ?? '');
+if (!typeDef) return Astro.redirect('/admin/dashboard');
+
+// Load reference options
+const refOptions: Record<string, { value: string; label: string }[]> = {};
+for (const field of typeDef.fields) {
+  if (field.reference) {
+    const docs = await sanityClient
+      .fetch(`*[_type == $refType]{_id, name, title}`, { refType: field.reference })
+      .catch(() => []);
+    refOptions[field.name] = docs.map((d: any) => ({
+      value: d._id,
+      label: d.name || d.title || d._id,
+    }));
+  }
+}
+
+const error = Astro.url.searchParams.get('error');
+---
+
+<Layout title={`New ${typeDef.title.slice(0, -1)}`} currentSection={typeDef.name}>
+  <div class="mb-4">
+    <a href={`/admin/content/${type}`} class="text-sm text-slate-400 hover:text-white transition">
+      ← Back to {typeDef.title}
+    </a>
+  </div>
+
+  {error && (
+    <div class="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">{error}</div>
+  )}
+
+  <form
+    action="/api/admin/content/create"
+    method="POST"
+    enctype="multipart/form-data"
+    class="space-y-5 rounded-xl border border-slate-800 bg-slate-900 p-6"
+  >
+    <input type="hidden" name="_type" value={type} />
+
+    {typeDef.fields.filter(f => f.type !== 'richText').map((field) => (
+      <div>
+        <label for={field.name} class="mb-1 block text-sm font-medium text-slate-300">
+          {field.label}
+          {field.required && <span class="text-red-400">*</span>}
+        </label>
+
+        {field.description && (
+          <p class="mb-1.5 text-xs text-slate-500">{field.description}</p>
+        )}
+
+        {field.type === 'textarea' ? (
+          <textarea id={field.name} name={field.name} rows={4}
+            class="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+          />
+        ) : field.type === 'select' || field.reference ? (
+          <select id={field.name} name={field.name}
+            class="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-indigo-500"
+          >
+            <option value="">— Select {field.label} —</option>
+            {(field.options ?? refOptions[field.name] ?? []).map((opt) => (
+              <option value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+        ) : field.type === 'image' ? (
+          <input id={field.name} name={field.name} type="file" accept="image/*"
+            class="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-sm text-slate-300 file:mr-3 file:rounded file:border-0 file:bg-indigo-600 file:px-3 file:py-1 file:text-sm file:text-white"
+          />
+        ) : field.type === 'images' ? (
+          <input id={field.name} name={field.name} type="file" accept="image/*" multiple
+            class="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-sm text-slate-300 file:mr-3 file:rounded file:border-0 file:bg-indigo-600 file:px-3 file:py-1 file:text-sm file:text-white"
+          />
+        ) : field.type === 'datetime' ? (
+          <input id={field.name} name={field.name} type="datetime-local"
+            class="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+          />
+        ) : field.type === 'tags' ? (
+          <input id={field.name} name={field.name} type="text" placeholder="tag1, tag2, tag3"
+            class="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+          />
+        ) : field.type === 'slug' ? (
+          <div class="flex items-center gap-2">
+            <span class="text-slate-600 text-sm">/</span>
+            <input id={field.name} name={field.name} type="text" placeholder="url-slug"
+              class="flex-1 rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+            />
+          </div>
+        ) : (
+          <input id={field.name} name={field.name} type={field.type === 'number' ? 'number' : 'text'}
+            class="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+          />
+        )}
+      </div>
+    ))}
+
+    {typeDef.fields.some(f => f.type === 'richText') && (
+      <div class="rounded-lg border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-sm text-amber-300">
+        Rich text fields (description, body) can be edited after creation in{' '}
+        <a href="https://kansmode-cms.sanity.studio" target="_blank" class="underline">Sanity Studio</a>.
+      </div>
+    )}
+
+    <div class="flex gap-3 pt-2">
+      <button type="submit"
+        class="rounded-lg bg-indigo-600 px-5 py-2.5 font-semibold text-white transition hover:bg-indigo-500"
+      >
+        Create
+      </button>
+      <a href={`/admin/content/${type}`}
+        class="rounded-lg border border-slate-700 px-5 py-2.5 text-slate-300 transition hover:bg-slate-800 hover:text-white"
+      >
+        Cancel
+      </a>
+    </div>
+  </form>
+</Layout>

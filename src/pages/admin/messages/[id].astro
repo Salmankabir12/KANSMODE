@@ -1,0 +1,93 @@
+---
+import Layout from '@/lib/admin/Layout.astro';
+import { requireAdmin } from '@/lib/admin/auth-check';
+
+await requireAdmin(Astro);
+
+const runtime = (Astro.locals as any).runtime;
+const db = runtime?.env?.DB;
+
+const { id } = Astro.params;
+let message: any = null;
+
+if (db && id) {
+  try {
+    const result = await db
+      .prepare('SELECT * FROM contacts WHERE id = ?')
+      .bind(Number(id))
+      .first();
+    message = result;
+  } catch (e) {
+    console.error('Failed to fetch message', e);
+  }
+}
+---
+
+<Layout title="Message Detail" currentSection="messages">
+  <div class="mb-4">
+    <a href="/admin/messages" class="text-sm text-slate-400 hover:text-white transition">
+      ← Back to Messages
+    </a>
+  </div>
+
+  {!message && (
+    <div class="rounded-xl border border-slate-800 bg-slate-900 p-10 text-center text-slate-500">
+      Message not found or database unavailable.
+    </div>
+  )}
+
+  {message && (
+    <div class="space-y-4">
+      <div class="rounded-xl border border-slate-800 bg-slate-900 p-6">
+        <dl class="space-y-4">
+          <div>
+            <dt class="text-xs font-medium text-slate-500 uppercase tracking-wide">Name</dt>
+            <dd class="mt-1 text-white">{message.name}</dd>
+          </div>
+          <div>
+            <dt class="text-xs font-medium text-slate-500 uppercase tracking-wide">Email</dt>
+            <dd class="mt-1">
+              <a href={`mailto:${message.email}`} class="text-indigo-400 hover:underline">{message.email}</a>
+            </dd>
+          </div>
+          {message.phone && (
+            <div>
+              <dt class="text-xs font-medium text-slate-500 uppercase tracking-wide">Phone</dt>
+              <dd class="mt-1 text-white">{message.phone}</dd>
+            </div>
+          )}
+          {message.subject && (
+            <div>
+              <dt class="text-xs font-medium text-slate-500 uppercase tracking-wide">Subject</dt>
+              <dd class="mt-1 text-white">{message.subject}</dd>
+            </div>
+          )}
+          <div>
+            <dt class="text-xs font-medium text-slate-500 uppercase tracking-wide">Date</dt>
+            <dd class="mt-1 text-slate-400">
+              {new Date(message.created_at).toLocaleString()}
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="rounded-xl border border-slate-800 bg-slate-900 p-6">
+        <h2 class="mb-3 text-sm font-medium text-slate-400 uppercase tracking-wide">Message</h2>
+        <p class="text-white whitespace-pre-wrap leading-relaxed">{message.message}</p>
+      </div>
+
+      <div class="flex gap-3">
+        <a href={`mailto:${message.email}`}
+          class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500"
+        >
+          Reply via Email
+        </a>
+        <a href="/admin/messages"
+          class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 transition hover:bg-slate-800 hover:text-white"
+        >
+          Back
+        </a>
+      </div>
+    </div>
+  )}
+</Layout>

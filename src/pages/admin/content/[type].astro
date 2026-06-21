@@ -1,0 +1,104 @@
+---
+import Layout from '@/lib/admin/Layout.astro';
+import { requireAdmin } from '@/lib/admin/auth-check';
+import { getTypeDef, type TypeDef } from '@/lib/admin/fields';
+import { sanityClient } from '@/lib/sanity';
+
+await requireAdmin(Astro);
+
+const { type } = Astro.params;
+const typeDef = getTypeDef(type ?? '');
+if (!typeDef) return Astro.redirect('/admin/dashboard');
+
+const titleField = typeDef.fields.find((f) => f.name === 'title' || f.name === 'name');
+const subtitleField = typeDef.fields.find((f) => f.type === 'text' && f.name !== 'title' && f.name !== 'name');
+
+const docs = await sanityClient
+  .fetch(`*[_type == $type] | order(_createdAt desc) { _id, _createdAt, _type, name, title, slug, role, quote, excerpt, email }`, { type: typeDef.name })
+  .catch(() => []) as any[];
+
+const successMsg = Astro.url.searchParams.get('created') ? 'Document created.' : Astro.url.searchParams.get('updated') ? 'Document updated.' : Astro.url.searchParams.get('deleted') ? 'Document deleted.' : null;
+const errorMsg = Astro.url.searchParams.get('error');
+---
+
+<Layout title={typeDef.title} currentSection={typeDef.name}>
+  <div class="flex items-center justify-between mb-6">
+    <p class="text-sm text-slate-400">{docs.length} document{docs.length !== 1 ? 's' : ''}</p>
+    <a
+      href={`/admin/content/${type}/new`}
+      class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500"
+    >
+      + Add New
+    </a>
+  </div>
+
+  {successMsg && (
+    <div class="mb-4 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">{successMsg}</div>
+  )}
+  {errorMsg && (
+    <div class="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">{errorMsg}</div>
+  )}
+
+  {docs.length === 0 ? (
+    <div class="rounded-xl border border-slate-800 bg-slate-900 p-10 text-center text-slate-500">
+      <p class="mb-2">No {typeDef.title.toLowerCase()} yet.</p>
+      <a href={`/admin/content/${type}/new`} class="text-indigo-400 hover:underline">Create the first one</a>
+    </div>
+  ) : (
+    <div class="overflow-x-auto rounded-xl border border-slate-800">
+      <table class="w-full text-sm">
+        <thead class="bg-slate-900 text-left text-slate-400">
+          <tr>
+            <th class="px-4 py-3 font-medium">{titleField?.label ?? 'Title'}</th>
+            <th class="px-4 py-3 font-medium">Created</th>
+            <th class="px-4 py-3 font-medium text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-800">
+          {docs.map((doc) => (
+            <tr class="hover:bg-slate-900/50 transition">
+              <td class="px-4 py-3">
+                <a
+                  href={`/admin/content/${type}/${doc._id}/edit`}
+                  class="text-white hover:text-indigo-400 transition"
+                >
+                  {doc.title || doc.name || doc.email || doc.quote?.slice(0, 60) || '(untitled)'}
+                </a>
+                {doc.slug?.current && (
+                  <span class="ml-2 text-xs text-slate-600">/{doc.slug.current}</span>
+                )}
+              </td>
+              <td class="px-4 py-3 text-slate-500">
+                {doc._createdAt ? new Date(doc._createdAt).toLocaleDateString() : '—'}
+              </td>
+              <td class="px-4 py-3 text-right">
+                <div class="flex items-center justify-end gap-2">
+                  <a
+                    href={`/admin/content/${type}/${doc._id}/edit`}
+                    class="rounded-md bg-slate-800 px-3 py-1 text-xs text-slate-300 hover:bg-slate-700 transition"
+                  >
+                    Edit
+                  </a>
+                  <form
+                    action="/api/admin/content/delete"
+                    method="POST"
+                    onsubmit="return confirm('Delete this document?')"
+                  >
+                    <input type="hidden" name="_type" value={type} />
+                    <input type="hidden" name="_id" value={doc._id} />
+                    <button
+                      type="submit"
+                      class="rounded-md bg-red-900/50 px-3 py-1 text-xs text-red-300 hover:bg-red-800 transition"
+                    >
+                      Delete
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )}
+</Layout>

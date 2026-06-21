@@ -1,0 +1,72 @@
+---
+import Layout from '@/lib/admin/Layout.astro';
+import { requireAdmin } from '@/lib/admin/auth-check';
+
+await requireAdmin(Astro);
+
+const runtime = (Astro.locals as any).runtime;
+const db = runtime?.env?.DB;
+
+let messages: any[] = [];
+
+if (db) {
+  try {
+    const result = await db
+      .prepare('SELECT id, name, email, subject, message, created_at FROM contacts ORDER BY created_at DESC')
+      .all();
+    messages = result.results ?? [];
+  } catch (e) {
+    console.error('Failed to fetch messages', e);
+  }
+}
+---
+
+<Layout title="Contact Messages" currentSection="messages">
+  {!db && (
+    <div class="mb-6 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+      D1 database binding not available. Messages are only visible when deployed on Cloudflare with the D1 binding.
+    </div>
+  )}
+
+  {db && messages.length === 0 && (
+    <div class="rounded-xl border border-slate-800 bg-slate-900 p-10 text-center text-slate-500">
+      No messages yet.
+    </div>
+  )}
+
+  {messages.length > 0 && (
+    <div class="overflow-x-auto rounded-xl border border-slate-800">
+      <table class="w-full text-sm">
+        <thead class="bg-slate-900 text-left text-slate-400">
+          <tr>
+            <th class="px-4 py-3 font-medium">Name</th>
+            <th class="px-4 py-3 font-medium">Email</th>
+            <th class="px-4 py-3 font-medium">Subject</th>
+            <th class="px-4 py-3 font-medium">Date</th>
+            <th class="px-4 py-3 font-medium text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-800">
+          {messages.map((msg) => (
+            <tr class="hover:bg-slate-900/50 transition">
+              <td class="px-4 py-3 text-white">{msg.name}</td>
+              <td class="px-4 py-3 text-slate-400">{msg.email}</td>
+              <td class="px-4 py-3 text-slate-300 max-w-48 truncate">{msg.subject || '—'}</td>
+              <td class="px-4 py-3 text-slate-500 text-nowrap">
+                {new Date(msg.created_at).toLocaleDateString()}
+              </td>
+              <td class="px-4 py-3 text-right">
+                <a
+                  href={`/admin/messages/${msg.id}`}
+                  class="rounded-md bg-slate-800 px-3 py-1 text-xs text-slate-300 hover:bg-slate-700 transition"
+                >
+                  View
+                </a>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )}
+</Layout>
