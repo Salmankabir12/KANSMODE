@@ -1,5 +1,7 @@
 # Kans Mode International Website
 
+**Live:** [https://650d54fe.kansmode-website.pages.dev](https://650d54fe.kansmode-website.pages.dev)
+
 Built with Astro v6 + React 19 + Svelte 5 + Tailwind v4, deployed on Cloudflare Pages with D1 and Sanity CMS.
 
 ## Stack
@@ -41,18 +43,6 @@ RESEND_API_KEY=re_...
 npm run build
 npx wrangler pages deploy dist --project-name=kansmode-website --branch=main
 ```
-
-## Sanity Studio
-
-Full CMS for editors, images, rich text, and all content types.
-
-- **Live Studio:** https://kansmode-cms.sanity.studio
-- **Local dev:**
-  ```bash
-  cd studio
-  npm install
-  npm run dev
-  ```
 
 ## Admin Panel
 
